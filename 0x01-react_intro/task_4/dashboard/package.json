@@ -1,7 +1,7 @@
 {
   "name": "dashboard",
   "version": "0.1.0",
-  "homepage": "https://anissafia90.github.io/alx-react",
+  "homepage": "https://anissafia90.github.io/alx-react/0x01-react_intro/task_4/dashboard",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
