@@ -1,8 +1,8 @@
 import React from "react";
-import logo from "../assets/logo.jpg";
+import logo from "../assets/holberton-logo.jpg";
 import "./Header.css";
 
-const Header = () => {
+function Header() {
   return (
     <>
       <div className="App-header">
@@ -11,6 +11,6 @@ const Header = () => {
       </div>
     </>
   );
-};
+}
 
 export default Header;
