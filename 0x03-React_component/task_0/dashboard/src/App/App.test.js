@@ -26,7 +26,7 @@ describe("App tests", () => {
   it("should render Login Component", () => {
     const component = shallow(<App />);
 
-    expect(component.contains(<Login />)).toBe(false);
+    expect(component.contains(<Login />)).toBe(true);
   });
   it("should render Footer component", () => {
     const component = shallow(<App />);
