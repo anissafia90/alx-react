@@ -60,7 +60,7 @@ class App extends React.Component {
               <Login />
             </BodySectionWithMarginBottom>
           )}
-          <BodySection title="test">
+          <BodySection title="News from the School">
             <p>
               Lorem ipsum dolor sit amet consectetur adipisicing elit.
               Perspiciatis at tempora odio, necessitatibus repudiandae
