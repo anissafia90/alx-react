@@ -5,6 +5,7 @@ import { getLatestNotification } from "../utils/utils";
 import { StyleSheetTestUtils } from "aphrodite";
 import notificationsNormalizer from "../schema/notifications";
 import { Map, fromJS } from "immutable";
+import { getUnreadNotificationsByType } from "../selectors/notificationSelector";
 
 const NOTIFICATIONS = [
   {
@@ -114,28 +115,60 @@ describe("<Notifications />", () => {
     beforeEach(() => {
       latestNotification = getLatestNotification();
       listNotifications = {
-        1: { guid: 1, type: "default", value: "New course available" },
-        2: { guid: 2, type: "urgent", value: "New resume available" },
-        3: { guid: 3, type: "urgent", html: { __html: latestNotification } },
+        notifications: fromJS({
+          messages: {
+            1: {
+              guid: 1,
+              type: "default",
+              value: "New course available",
+              isRead: false,
+            },
+            2: {
+              guid: 2,
+              type: "urgent",
+              value: "New resume available",
+              isRead: false,
+            },
+            3: {
+              guid: 3,
+              type: "urgent",
+              html: { __html: latestNotification },
+              isRead: false,
+            },
+          },
+        }),
       };
     });
 
     it("Notifications renders Notification Items and items have correct html", () => {
+      const messages = getUnreadNotificationsByType(listNotifications);
+
       const wrapper = mount(
-        <Notifications displayDrawer listNotifications={listNotifications} />
+        <Notifications displayDrawer listNotifications={messages} />
       );
       expect(wrapper.exists());
       wrapper.update();
       const listItems = wrapper.find("NotificationItem");
       expect(listItems).toBeDefined();
       expect(listItems).toHaveLength(3);
+      // expect(listItems.at(0).contains()).toEqual(
+      //   '<li data-notification-type="default">New course available</li>'
+      // );
       expect(listItems.at(0).html()).toContain("<li");
       expect(listItems.at(0).props().type).toEqual("default");
       expect(listItems.at(0).text()).toEqual("New course available");
 
+      // expect(listItems.at(1).html()).toEqual(
+      //   '<li data-notification-type="urgent">New resume available</li>'
+      // );
+
       expect(listItems.at(1).html()).toContain("<li");
       expect(listItems.at(1).props().type).toEqual("urgent");
       expect(listItems.at(1).text()).toEqual("New resume available");
+
+      // expect(listItems.at(2).html()).toEqual(
+      //   `<li data-notification-type="urgent">${latestNotification}</li>`
+      // );
 
       expect(listItems.at(2).html()).toContain("<li");
       expect(listItems.at(2).props().type).toEqual("urgent");
@@ -156,6 +189,9 @@ describe("<Notifications />", () => {
       wrapper.update();
       const listItems = wrapper.find("NotificationItem");
       expect(listItems).toHaveLength(1);
+      // expect(listItems.html()).toEqual(
+      //   '<li data-notification-type="default">No new notification for now</li>'
+      // );
 
       expect(listItems.props().type).toEqual("noNotifications");
       expect(listItems.text()).toEqual("No new notifications for now");
@@ -166,6 +202,9 @@ describe("<Notifications />", () => {
       wrapper.update();
       const listItems = wrapper.find("NotificationItem");
       expect(listItems).toHaveLength(1);
+      // expect(listItems.html()).toEqual(
+      //   '<li data-notification-type="default">No new notification for now</li>'
+      // );
 
       expect(listItems.props().type).toEqual("noNotifications");
       expect(listItems.text()).toEqual("No new notifications for now");
@@ -288,6 +327,27 @@ describe("<Notifications />", () => {
       );
 
       expect(fetchNotifications).toHaveBeenCalled();
+
+      jest.restoreAllMocks();
+    });
+
+    it("verify that clicking on the menu item calls handleDisplayDrawer", () => {
+      const setNotificationFilter = jest.fn();
+
+      const wrapper = shallow(
+        <Notifications
+          setNotificationFilter={setNotificationFilter}
+          displayDrawer={true}
+        />
+      );
+
+      wrapper.find("#buttonFilterUrgent").simulate("click");
+
+      expect(setNotificationFilter).toHaveBeenNthCalledWith(1, "URGENT");
+
+      wrapper.find("#buttonFilterDefault").simulate("click");
+
+      expect(setNotificationFilter).toHaveBeenNthCalledWith(2, "DEFAULT");
 
       jest.restoreAllMocks();
     });
