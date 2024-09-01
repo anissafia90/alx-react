@@ -39,7 +39,6 @@ class App extends Component {
     this.logOut = this.logOut.bind(this);
     this.markNotificationAsRead = this.markNotificationAsRead.bind(this);
     this.state = {
-      displayDrawer: false,
       user,
       logOut: this.logOut,
       listNotifications: listNotificationsInitialState,
@@ -69,9 +68,9 @@ class App extends Component {
 
   markNotificationAsRead(id) {
     this.setState({
-      listNotifications: this.state.listNotifications.filter((notification) => {
-        return notification.id !== id;
-      }),
+      listNotifications: this.state.listNotifications.filter(
+        (notification) => notification.id !== id
+      ),
     });
   }
 
@@ -85,14 +84,12 @@ class App extends Component {
 
   render() {
     const { user, logOut, listNotifications } = this.state;
-
     const {
       isLoggedIn,
       displayDrawer,
       displayNotificationDrawer,
       hideNotificationDrawer,
     } = this.props;
-
     const value = { user, logOut };
 
     return (
@@ -208,7 +205,5 @@ export const mapDispatchToProps = {
   displayNotificationDrawer,
   hideNotificationDrawer,
 };
-
-// export default App;
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
