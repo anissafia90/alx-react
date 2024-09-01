@@ -13,12 +13,22 @@ const store = createStore(uiReducer, initialState);
 
 describe("<App />", () => {
   it("mapStateToProps returns the right object from user Login", () => {
-    let state = fromJS({
+    const state = fromJS({
       isUserLoggedIn: true,
     });
 
     const result = mapStateToProps(state);
 
     expect(result).toEqual({ isLoggedIn: true });
+  });
+
+  it("should return the right object from displayDrawer", () => {
+    const state = fromJS({
+      isNotificationDrawerVisible: true,
+    });
+
+    const result = mapStateToProps(state);
+
+    expect(result).toEqual({ displayDrawer: true });
   });
 });
