@@ -1,13 +1,18 @@
-import React, { Component, PureComponent } from "react";
-import { StyleSheet, css } from "aphrodite";
-import closeIcon from "../assets/close-icon.png";
+import React, { PureComponent, Component } from "react";
+import { connect } from "react-redux";
+import { fetchNotifications } from "../actions/notificationActionCreators";
 import NotificationItem from "./NotificationItem";
-import NotificationItemShape from "./NotificationItemShape";
 import PropTypes from "prop-types";
+import closeIcon from "../assets/close-icon.png";
+import { StyleSheet, css } from "aphrodite";
 
-class Notifications extends PureComponent {
+export class Notifications extends Component {
   constructor(props) {
     super(props);
+  }
+
+  componentDidMount() {
+    this.props.fetchNotifications();
   }
 
   render() {
@@ -18,168 +23,204 @@ class Notifications extends PureComponent {
       handleHideDrawer,
       markNotificationAsRead,
     } = this.props;
+
+    const menuPStyle = css(
+      displayDrawer ? styles.menuItemPNoShow : styles.menuItemPShow
+    );
+
     return (
-      <div
-        className={
-          displayDrawer
-            ? css(styles.notificationsContainer, styles.drawerOpen)
-            : css(styles.notificationsContainer)
-        }
-      >
+      <>
         <div
-          className={
-            displayDrawer
-              ? css(styles.none)
-              : css(styles.menuItem, styles.hover)
-          }
-          onClick={() => {
-            handleDisplayDrawer();
-          }}
+          className={css(styles.menuItem)}
+          id="menuItem"
+          onClick={handleDisplayDrawer}
         >
-          Your notifications
+          <p className={menuPStyle}>Your notifications</p>
         </div>
-        {displayDrawer ? (
-          <div className={css(styles.Notifications, styles.noBorder)}>
-            <p className={css(styles.center)}>
-              Here is the list of notifications
-            </p>
-            <ul>
-              {listNotifications && listNotifications.length > 0 ? (
-                listNotifications.map(({ type, value, html, id }) => (
-                  <NotificationItem
-                    key={id}
-                    type={type}
-                    value={value}
-                    html={html}
-                    markAsRead={markNotificationAsRead}
-                    id={id}
-                    styles={
-                      html || type === "urgent" ? styles.urgent : styles.default
-                    }
-                  />
-                ))
-              ) : (
-                <NotificationItem value="No new notification for now" />
-              )}
-            </ul>
+        {displayDrawer && (
+          <div className={css(styles.notifications)} id="Notifications">
             <button
-              className={css(styles.button)}
-              aria-label="Close"
-              onClick={() => {
-                console.log("Close button has been clicked");
-                handleHideDrawer();
+              style={{
+                background: "transparent",
+                border: "none",
+                position: "absolute",
+                right: 20,
               }}
+              aria-label="close"
+              onClick={handleHideDrawer}
+              id="closeNotifications"
             >
               <img
                 src={closeIcon}
-                alt="close icon"
-                width="10px"
-                height="10px"
+                alt="close-icon"
+                className={css(styles.notificationsButtonImage)}
               />
             </button>
+            <p className={css(styles.notificationsP)}>
+              Here is the list of notifications
+            </p>
+            <ul className={css(styles.notificationsUL)}>
+              {!listNotifications && (
+                <NotificationItem
+                  type="noNotifications"
+                  value="No new notifications for now"
+                />
+              )}
+
+              {listNotifications &&
+                Object.values(listNotifications).map((notification) => (
+                  <NotificationItem
+                    key={notification.guid}
+                    id={notification.guid}
+                    type={notification.type}
+                    value={notification.value}
+                    html={notification.html}
+                    markAsRead={markNotificationAsRead}
+                  />
+                ))}
+            </ul>
           </div>
-        ) : null}
-      </div>
+        )}
+      </>
     );
   }
 }
 
+Notifications.defaultProps = {
+  displayDrawer: false,
+  listNotifications: null,
+  handleDisplayDrawer: () => {},
+  handleHideDrawer: () => {},
+  markNotificationAsRead: () => {},
+  fetchNotifications: () => {},
+};
+
 Notifications.propTypes = {
   displayDrawer: PropTypes.bool,
-  listNotifications: PropTypes.arrayOf(NotificationItemShape),
+  listNotifications: PropTypes.object,
   handleDisplayDrawer: PropTypes.func,
   handleHideDrawer: PropTypes.func,
   markNotificationAsRead: PropTypes.func,
 };
 
-Notifications.defaultProps = {
-  displayDrawer: false,
-  listNotifications: [],
-  handleDisplayDrawer: () => {},
-  handleDisplayDrawer: () => {},
-  markNotificationAsRead: () => {},
+const cssVars = {
+  mainColor: "#e01d3f",
+};
+
+const screenSize = {
+  small: "@media screen and (max-width: 900px)",
 };
 
 const opacityKeyframes = {
   from: {
     opacity: 0.5,
   },
+
   to: {
     opacity: 1,
   },
 };
 
-const bounceKeyframes = {
+const translateYKeyframes = {
   "0%": {
     transform: "translateY(0)",
   },
-  "25%": {
+
+  "50%": {
     transform: "translateY(-5px)",
   },
+
   "75%": {
     transform: "translateY(5px)",
   },
+
   "100%": {
     transform: "translateY(0)",
   },
 };
 
+const borderKeyframes = {
+  "0%": {
+    border: `3px dashed deepSkyBlue`,
+  },
+
+  "100%": {
+    border: `3px dashed ${cssVars.mainColor}`,
+  },
+};
+
 const styles = StyleSheet.create({
-  notificationsContainer: {
-    display: "flex",
-    flexDirection: "column",
-    marginTop: "1rem",
-    marginRight: "1rem",
-    gridRow: "1",
-  },
   menuItem: {
-    textAlign: "right",
-    marginRight: ".5rem",
-  },
-  hover: {
+    float: "right",
+    backgroundColor: "#fff8f8",
     ":hover": {
       cursor: "pointer",
-      animationName: [bounceKeyframes, opacityKeyframes],
-      animationDuration: "0.5s, 1s",
-      animationIterationCount: "3",
+      animationName: [opacityKeyframes, translateYKeyframes],
+      animationDuration: "1s, 0.5s",
+      animationIterationCount: 3,
     },
   },
-  Notifications: {
-    border: "dashed red",
-    padding: "2rem",
-    marginTop: ".3rem",
-  },
-  noBorder: {
-    "@media (max-width: 900px)": {
-      border: "none",
-    },
-  },
-  none: {
+
+  menuItemPNoShow: {
+    marginRight: "8px",
     display: "none",
-    "@media (max-width: 900px)": {
-      display: "none",
-    },
   },
-  button: {
-    position: "absolute",
-    top: "3.5rem",
-    right: "2.2rem",
-    "@media (max-width: 900px)": {
-      top: "10.5rem",
-      right: "14.2rem",
-    },
+
+  menuItemPShow: {
+    marginRight: "8px",
   },
-  center: {
-    "@media (max-width: 900px)": {
-      marginLeft: "4vw",
+
+  notifications: {
+    padding: "10px",
+    marginBottom: "20px",
+    animationName: [borderKeyframes],
+    animationDuration: "0.8s",
+    animationIterationCount: 1,
+    animationFillMode: "forwards",
+    ":hover": {
+      border: `3px dashed deepSkyBlue`,
+    },
+    [screenSize.small]: {
+      float: "none",
+      border: "none",
+      listStyle: "none",
+      padding: 0,
       fontSize: "20px",
+      ":hover": {
+        border: "none",
+      },
+      position: "absolute",
+      background: "white",
+      height: "110vh",
+      width: "100vw",
+      zIndex: 10,
     },
   },
-  drawerOpen: {
-    "@media (max-width: 900px)": {
-      gridRow: "2",
+
+  notificationsButtonImage: {
+    width: "10px",
+  },
+
+  notificationsP: {
+    margin: 0,
+    marginTop: "15px",
+  },
+
+  notificationsUL: {
+    [screenSize.small]: {
+      padding: 0,
     },
   },
 });
 
-export default Notifications;
+const mapStateToProps = (state) => {
+  return {
+    listNotifications: state.notifications.get("messages"),
+  };
+};
+
+const mapDispatchToProps = {
+  fetchNotifications,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Notifications);
