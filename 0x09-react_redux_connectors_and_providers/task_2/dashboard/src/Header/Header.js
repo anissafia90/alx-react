@@ -1,55 +1,87 @@
-import React from "react";
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import { logout } from "../actions/uiActionCreators";
+import PropTypes from "prop-types";
 import { StyleSheet, css } from "aphrodite";
-import holberton_logo from "../assets/holberton-logo.jpg";
-import { AppContext } from "../App/AppContext";
+import AppContext from "../App/AppContext";
+import holberton_logo from "../assets/holberton_logo.jpg";
 
-class Header extends React.Component {
+export class Header extends Component {
+  constructor(props) {
+    super(props);
+  }
+
   render() {
-    const data = this.context;
+    const { user, logout } = this.props;
+
     return (
-      <React.Fragment>
-        <div className={css(styles.header)}>
-          <img src={holberton_logo} className={css(styles.logo)} alt="logo" />
-          <h1 className={css(styles.title)}>School dashboard</h1>
-        </div>
-        {data.user.isLoggedIn && (
-          <div className={css(styles.greeting)} id="logoutSection">
-            Welcome {data.user.email}{" "}
-            <a className={css(styles.logout)} onClick={data.logOut}>
+      <div className={css(styles.header)}>
+        <img src={holberton_logo} className={css(styles.headerImg)} />
+        <h1>School dashboard</h1>
+
+        {user && (
+          <p id="logoutSection" className={css(styles.logoutSection)}>
+            Welcome <b>{`${user.email} `}</b>
+            <span onClick={logout} className={css(styles.logoutSectionSpan)}>
               (logout)
-            </a>
-          </div>
+            </span>
+          </p>
         )}
-      </React.Fragment>
+      </div>
     );
   }
 }
 
-Header.contextType = AppContext;
+const cssVars = {
+  mainColor: "#e01d3f",
+};
 
 const styles = StyleSheet.create({
   header: {
     display: "flex",
     alignItems: "center",
-    fontSize: "calc(10px + 2vmin)",
-    color: "white",
-    "@media (max-width: 900px)": {
-      justifyContent: "center",
-    },
+    color: cssVars.mainColor,
+    fontSize: "20px",
   },
-  title: {
-    color: "red",
+
+  headerImg: {
+    width: "200px",
   },
-  logo: {
-    height: "100px",
-    width: "100px",
+  logoutSection: {
+    color: "black",
+    position: "absolute",
+    right: 0,
+    paddingRight: "20px",
+    alignSelf: "flex-end",
   },
-  greeting: {
-    marginTop: "1rem",
-  },
-  logout: {
+  logoutSectionSpan: {
+    fontStyle: "italic",
     cursor: "pointer",
   },
 });
 
-export default Header;
+Header.contextType = AppContext;
+
+Header.defaultProps = {
+  user: null,
+  logout: () => {},
+};
+
+Header.propTypes = {
+  user: PropTypes.object,
+  logout: PropTypes.func,
+};
+
+const mapStateToProps = (state) => {
+  return {
+    user: state.get("user"),
+  };
+};
+
+const mapDispatchToProps = {
+  logout,
+};
+
+// export default Header;
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header);
