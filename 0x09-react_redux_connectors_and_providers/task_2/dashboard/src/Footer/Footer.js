@@ -1,41 +1,31 @@
+import { shallow, mount } from "enzyme";
 import React from "react";
-import "./Footer.css";
-import { getFullYear, getFooterCopy } from "../utils/utils";
-import { AppContext } from "../App/AppContext";
-import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import { Footer } from "./Footer";
+import AppContext from "../App/AppContext";
+import { user, logOut } from "../App/AppContext";
+import { shallowEqual } from "react-redux";
 
-const Footer = () => {
-  return (
-    <AppContext.Consumer>
-      {({ user: { email, password, isLoggedIn }, logOut }) => (
-        <div className="footer">
-          {isLoggedIn && (
-            <p>
-              <a>Contact us</a>
-            </p>
-          )}
-          <p>
-            Copyright {getFullYear()} - {getFooterCopy(true)}
-          </p>
-        </div>
-      )}
-    </AppContext.Consumer>
-  );
-};
+describe("<Footer />", () => {
+  it("Footer renders without crashing", () => {
+    const wrapper = shallow(<Footer />);
+    expect(wrapper.exists()).toEqual(true);
+  });
+  it("Verifies that the components at the very least render the text “Copyright”", () => {
+    const wrapper = shallow(<Footer />);
+    expect(wrapper.find("div.footer p")).toHaveLength(1);
+    expect(wrapper.find("div.footer p").text()).toContain("Copyright");
+  });
 
-Footer.defaultProps = {
-  user: null,
-};
+  it("verifies that the link is not displayed when the user is logged out within the context", () => {
+    const wrapper = shallow(<Footer user={null} />);
+    expect(wrapper.find("div.footer a")).toHaveLength(0);
+  });
 
-Footer.propTypes = {
-  user: PropTypes.object,
-};
-
-const mapStateToProps = (state) => {
-  return {
-    user: state.get("user"),
-  };
-};
-
-export default connect(mapStateToProps, null)(Footer);
+  it("verifies that the link is displayed when the user is logged in within the context", () => {
+    const wrapper = shallow(
+      <Footer user={{ email: "larry@hd.com", password: "123456" }} />
+    );
+    expect(wrapper.find("div.footer a")).toHaveLength(1);
+    expect(wrapper.find("div.footer a").text()).toEqual("Contact us");
+  });
+});
